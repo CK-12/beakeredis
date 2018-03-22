@@ -1,5 +1,5 @@
 import json
-import logging
+import logging,six
 
 from beaker.container import NamespaceManager, Container
 from beaker.synchronization import file_synchronizer
@@ -118,7 +118,7 @@ class RedisManager(NamespaceManager):
         self.db_conn.delete(self._format_key(key))
 
     def _format_key(self, key):
-        return 'beaker:{0}:{1}'.format(self.namespace, key.replace(' ', '\302\267'))
+        return 'beaker:{0}:{1}'.format(self.namespace, self.safe_decode(key).replace(' ', '\302\267'))
 
     def _format_pool_key(self, host, port):
         return '{0}:{1}:{2}'.format(host, port, self.db)
@@ -129,6 +129,11 @@ class RedisManager(NamespaceManager):
     def keys(self):
         return self.db_conn.keys('beaker:{0}:*'.format(self.namespace))
 
+    # To support both python 2 and 3
+    def safe_decode(self, s): #or tounicode(s)
+        if s != None and ((six.PY2 and type(s).__name__ == 'str') or (six.PY3 and type(s).__name__ == 'bytes')):
+            return s.decode('utf-8')
+        return s
 
 class RedisContainer(Container):
     namespace_class = RedisManager

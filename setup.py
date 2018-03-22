@@ -50,7 +50,8 @@ setup(
     zip_safe=False,
     install_requires=[
         'Beaker>=1.6.4',
-        'redis>=2.10'
+        'redis>=2.10',
+        'six'
     ],
     cmdclass=dict(test=PyTest),
     entry_points="""
